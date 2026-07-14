@@ -1,0 +1,332 @@
+clear;clc;close all;
+
+% ========== 参数设置 ==========
+M = 10;         % 光纤数量
+N = 7;          % 设备数量
+L0 = 5;         % 基础距离 (km)
+r = 1.5;        % 距离增量 (km/设备)
+alpha_loss = 0.2;   % 光纤损耗 (dB/km)
+P_total = 25;       % 总功率 (W)
+T_max = 1.4;        % 最大时延 (s)
+P_static = 0.1;     % 静态功耗 (W)
+C_S = 0.2;          % 采样功耗系数 (W/MHz)
+C_CPU = 0.001;      % CPU功耗系数 (W/GHz^3)
+s = 2;              % 样本大小 (bit)
+T0 = 1;             % 采样时间 (s)
+n_flop = 100;       % 浮点操作数/样本
+R = 500;            % 传输速率 (Mbit/s)
+f_CPU_min = 500;    % CPU最小频率 (MHz)
+f_CPU_max = 1000;   % CPU最大频率 (MHz)
+f_s_min = 1;        % 采样最小频率 (MHz)
+f_s_max = 2;        % 采样最大频率 (MHz)
+P_fiber_min = 0;    % 光纤最小功率 (W)
+P_fiber_max = 3;    % 光纤最大功率 (W)
+output_interval = 1;
+
+rng(444) % 固定随机种子
+
+% ========== 遗传算法参数 ==========
+pop_size = 5000;      % 种群大小
+max_gen = 1000;       % 最大迭代次数
+crossover_prob = 0.8; % 交叉概率
+mutation_prob = 0.2;  % 变异概率
+penalty_coeff = 1e3;  % 约束违反惩罚系数
+
+% ========== 数据记录 ==========
+best_fitness_history = zeros(max_gen, 1);
+avg_fitness_history = zeros(max_gen, 1);
+
+% ========== 初始化种群 ==========
+% 种群结构体，每个个体包含x_ij、P_fiber、f_s、f_CPU
+population = struct('x_ij', {}, 'P_fiber', {}, 'f_s', {}, 'f_CPU', {});
+
+for ind = 1:pop_size
+    % 初始化x_ij：每根光纤50%概率分配给一个随机设备
+    x_ij = zeros(M, N);
+    for i = 1:M
+        if rand() < 0.5
+            j = randi(N);
+            x_ij(i, j) = 1;
+        end
+    end
+
+    % 初始化光纤功率 [P_fiber_min, P_fiber_max]
+    P_fiber = P_fiber_min + (P_fiber_max - P_fiber_min)*rand(M, 1);
+
+    % 初始化采样频率 [f_s_min, f_s_max]
+    f_s = f_s_min + (f_s_max - f_s_min)*rand(N, 1);
+
+    % 初始化CPU频率 [f_CPU_min, f_CPU_max]
+    f_CPU = f_CPU_min + (f_CPU_max - f_CPU_min)*rand(N, 1);
+
+    population(ind).x_ij = x_ij;
+    population(ind).P_fiber = P_fiber;
+    population(ind).f_s = f_s;
+    population(ind).f_CPU = f_CPU;
+end
+
+% ========== 遗传主循环 ==========
+best_fitness = -inf;
+best_solution = [];
+
+for gen = 1:max_gen
+
+    % 计算适应度
+    fitness = zeros(pop_size, 1);
+    for ind = 1:pop_size
+        sol = population(ind);
+        [f, v1, v2, v3] = calculateFitness(sol, M, N, L0, r, alpha_loss,...
+            P_static, C_S, C_CPU, s, T0, n_flop, R, P_total, T_max,...
+            penalty_coeff);
+        fitness(ind) = f - penalty_coeff*(v1 + v2 + v3);
+    end
+
+    % 更新最优解
+    [max_fit, idx] = max(fitness);
+    if max_fit > best_fitness
+        best_fitness = max_fit;
+        best_solution = population(idx);
+    end
+
+    % 记录迭代数据
+    best_fitness_history(gen) = max_fit;
+    avg_fitness_history(gen) = mean(fitness);
+
+    % === 收敛判断模块 ===
+    if gen > 50
+        delta = abs(diff(best_fitness_history(gen-49:gen)));
+        std_recent = std(best_fitness_history(gen-49:gen));
+        avg_gap = mean(best_fitness_history(gen-49:gen) - avg_fitness_history(gen-49:gen));
+
+        if std_recent < 1e-4 && mean(delta(end-10:end)) < 1e-4 && avg_gap < 1e-3
+            fprintf('提前终止：第 %d 代后收敛稳定（std = %.2e, gap = %.2e）\n', ...
+                gen, std_recent, avg_gap);
+            break;
+        end
+    end
+
+    % 迭代进度输出
+    if mod(gen, output_interval) == 0 || gen == 1
+        fprintf('Generation %4d:  Best Fitness=%.4f  |  Avg Fitness=%.4f\n',...
+                gen, best_fitness_history(gen), avg_fitness_history(gen));
+    end
+
+    % 选择（锦标赛选择，size=2）
+    new_pop = struct('x_ij', {}, 'P_fiber', {}, 'f_s', {}, 'f_CPU', {});
+    for i = 1:pop_size
+        candidates = randperm(pop_size, 2);
+        if fitness(candidates(1)) > fitness(candidates(2))
+            new_pop(i) = population(candidates(1));
+        else
+            new_pop(i) = population(candidates(2));
+        end
+    end
+
+    % 交叉操作（单点交叉）
+    for i = 1:2:pop_size-1
+        if rand() < crossover_prob
+            p1 = new_pop(i);
+            p2 = new_pop(i+1);
+            cross_point = randi(M*N + M + 2*N - 1);
+            c1 = crossover(p1, p2, cross_point, M, N);
+            c2 = crossover(p2, p1, cross_point, M, N);
+            new_pop(i) = c1;
+            new_pop(i+1) = c2;
+        end
+    end
+
+    % 变异操作
+    for i = 1:pop_size
+        if rand() < mutation_prob
+            mutated = mutate(new_pop(i), M, N, P_fiber_min, P_fiber_max,...
+                f_s_min, f_s_max, f_CPU_min, f_CPU_max);
+            new_pop(i) = mutated;
+        end
+    end
+
+    population = new_pop;
+end
+
+% ========== 结果输出 ==========
+disp('========== Optimal Solution ==========');
+
+fprintf('\n[光纤-设备连接矩阵 x_ij]:\n');
+disp(best_solution.x_ij);
+
+fprintf('\n[光纤发射功率 P_fiber_i (W)]:\n');
+for i = 1:M
+    fprintf('Fiber %2d: %.4f\n', i, best_solution.P_fiber(i));
+end
+
+fprintf('\n[设备采样频率 f_s_j (MHz)]:\n');
+for j = 1:N
+    fprintf('Device %d: %.2f\n', j, best_solution.f_s(j));
+end
+
+fprintf('\n[CPU频率 f_CPU_j (MHz)]:\n');
+for j = 1:N
+    fprintf('Device %d: %.2f\n', j, best_solution.f_CPU(j));
+end
+
+fprintf('\n[性能指标]\n');
+fprintf('最佳适应度: %.4f\n', best_fitness);
+fprintf('总消耗功率: %.2f W (限额: %d W)\n', ...
+    sum(sum(best_solution.x_ij .* best_solution.P_fiber)), P_total);
+
+% 每台设备的时延和能耗
+for j = 1:N
+    Lj = L0 + (2*j-1)*r;
+    fiber_power = sum(best_solution.x_ij(:,j) .* best_solution.P_fiber .* 10.^(-alpha_loss*Lj/10));
+    electrical_power = fiber_power * 0.3;
+    P_tx_j = 10^((0.2 .* Lj + 5)/10) / 1000;
+    required = P_static + C_S*best_solution.f_s(j) + ...
+        C_CPU*(best_solution.f_CPU(j)/100)^3 + P_tx_j;
+    delay_j = T0 + (best_solution.f_s(j)*s*T0*n_flop)/best_solution.f_CPU(j) + ...
+        (best_solution.f_s(j)*s*T0)/R;
+    fprintf('设备 %d: 距离=%.1fkm, 接收光功率=%.4fW, 电功率=%.4fW, 需求功率=%.4fW, 时延=%.4fs\n', ...
+        j, Lj, fiber_power, electrical_power, required, delay_j);
+end
+
+% ========== 收敛曲线可视化 ==========
+figure;
+
+% 左图：全局适应度曲线
+subplot(1,2,1);
+plot(1:max_gen, best_fitness_history, 'b-', 'LineWidth', 1.5); hold on;
+plot(1:max_gen, avg_fitness_history, 'r--', 'LineWidth', 1.5);
+title('Global Fitness Evolution');
+xlabel('Generation'); ylabel('Fitness');
+legend('Best','Average','Location','southeast');
+grid on; set(gca, 'FontSize', 11);
+
+% 右图：收敛段放大
+subplot(1,2,2);
+plot(1:max_gen, best_fitness_history, 'b-', 'LineWidth', 1.5); hold on;
+
+tail_len = min(150, length(best_fitness_history));
+tail_vals = best_fitness_history(end-tail_len+1:end);
+[unique_vals, ~, idx_map] = unique(round(tail_vals, 6));
+counts = accumarray(idx_map, 1);
+[~, max_idx] = max(counts);
+converged_val = unique_vals(max_idx);
+
+tolerance = abs(best_fitness_history(end) - converged_val);
+if tolerance < 1e-6
+    tolerance = 0.01;
+end
+
+ylim([converged_val - 1.5*tolerance, converged_val + 1.5*tolerance]);
+title('Zoomed View: Convergence Band');
+xlabel('Generation'); ylabel('Fitness');
+grid on; set(gca, 'FontSize', 11);
+
+% ========== 适应度计算函数 ==========
+function [f, v1, v2, v3] = calculateFitness(sol, M, N, L0, r, alpha,...
+    P_static, C_S, C_CPU, s, T0, n_flop, R, P_total, T_max, penalty)
+    x_ij = sol.x_ij;
+    P_fiber = sol.P_fiber;
+    f_s = sol.f_s;
+    f_CPU = sol.f_CPU;
+
+    % 目标函数分子
+    numerator = sum(f_s * s * T0);
+
+    % 分母及约束违反量
+    denominator = 0;
+    v1 = 0; v2 = 0; v3 = 0;
+
+    for j = 1:N
+        Lj = L0 + (2*j-1)*r;
+
+        % 设备j接收到的光纤功率（含衰减）
+        fiber_power = sum(x_ij(:,j) .* P_fiber .* 10.^(-alpha*Lj/10));
+
+        % 光电转换后的电功率
+        eta_oe = 0.3;
+        electrical_power = fiber_power * eta_oe;
+
+        % 距离相关的发射功率 P_tx(j)
+        P_tx_j = 0.2 * 10^((2 + 0.2 * Lj) / 10) / 1000;
+
+        % 设备j的功耗需求
+        required = P_static + C_S*f_s(j) + C_CPU*(f_CPU(j)/100)^3 + P_tx_j;
+
+        % 约束1：光电转换后的供给功率 >= 设备需求功率
+        if electrical_power < required
+            v1 = v1 + (required - electrical_power);
+        end
+
+        % 分母累加项（使用电功率）
+        term_j = fiber_power*(T0 + (f_s(j)*s*T0*n_flop)/f_CPU(j)...
+            + (f_s(j)*s*T0)/R);
+        denominator = denominator + term_j;
+
+        % 约束3：时延 <= T_max
+        delay = T0 + (f_s(j)*s*T0*n_flop)/f_CPU(j) + (f_s(j)*s*T0)/R;
+        if delay > T_max
+            v3 = v3 + (delay - T_max);
+        end
+    end
+
+    % 约束2：总功率 <= P_total
+    total_power = sum(sum(x_ij .* P_fiber));
+    if total_power > P_total
+        v2 = total_power - P_total;
+    end
+
+    % 计算适应度（能效 = 数据量 / 能耗）
+    if denominator == 0
+        f = 0;
+    else
+        f = numerator / denominator;
+    end
+end
+
+% ========== 交叉函数 ==========
+function child = crossover(p1, p2, point, M, N)
+    vec1 = [p1.x_ij(:); p1.P_fiber; p1.f_s; p1.f_CPU];
+    vec2 = [p2.x_ij(:); p2.P_fiber; p2.f_s; p2.f_CPU];
+
+    child_vec = vec1;
+    child_vec(point+1:end) = vec2(point+1:end);
+
+    child.x_ij = reshape(child_vec(1:M*N), M, N);
+    child.P_fiber = child_vec(M*N+1:M*N+M);
+    child.f_s = child_vec(M*N+M+1:M*N+M+N);
+    child.f_CPU = child_vec(M*N+M+N+1:end);
+
+    % 修复x_ij：每根光纤最多连接一个设备
+    for i = 1:M
+        idx = find(child.x_ij(i,:) == 1);
+        if numel(idx) > 1
+            child.x_ij(i,:) = 0;
+            child.x_ij(i, idx(randi(numel(idx)))) = 1;
+        end
+    end
+end
+
+% ========== 变异函数 ==========
+function mutated = mutate(sol, M, N, Pf_min, Pf_max, fs_min, fs_max, fCPU_min, fCPU_max)
+    mutated = sol;
+
+    % x_ij变异：每根光纤10%概率重新分配设备
+    for i = 1:M
+        if rand() < 0.1
+            j = randi(N);
+            mutated.x_ij(i,:) = 0;
+            mutated.x_ij(i,j) = 1;
+        end
+    end
+
+    % P_fiber变异：随机选一根光纤重设功率
+    mut_idx = randi(M);
+    mutated.P_fiber(mut_idx) = Pf_min + (Pf_max - Pf_min)*rand();
+
+    % f_s变异：随机选一个设备重设采样频率
+    mut_idx = randi(N);
+    mutated.f_s(mut_idx) = fs_min + (fs_max - fs_min)*rand();
+
+    % f_CPU变异：随机选一个设备重设CPU频率
+    mut_idx = randi(N);
+    mutated.f_CPU(mut_idx) = fCPU_min + (fCPU_max - fCPU_min)*rand();
+end
