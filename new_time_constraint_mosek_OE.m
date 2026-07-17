@@ -14,11 +14,11 @@ cvx_expert true;
 
 %% 参数设置
 M = 10         % 光纤数量
-N = 7;         % 设备数量
+N = 4;         % 设备数量
 L0 = 5;         % 基础距离 (km)
 r = 1.5;        % 每个设备增加距离 (km)
 alpha_loss = 0.2;   % 光纤损耗 (dB/km)
-P_total = 25;       % 总供电功率 (W)
+P_total = 15;       % 总供电功率 (W)
 T_max = 1.4;        % 最大允许时延 (s)    
 oe_eta = 0.3; % 新增光电转化效率
 
@@ -36,15 +36,16 @@ f_CPU_min = 500; f_CPU_max = 1000;   % MHz
 f_s_min = 1;      f_s_max = 2;        % MHz
 
 % 光纤功率约束
-P_fiber_min = 0; P_fiber_max = 3;     % W
+P_fiber_min = 0; P_fiber_max = 2;     % W
 
 % 光纤损耗系数 alpha_f(j)
 L = @(j) L0 + r * (2 * j - 1);
 alpha_f = arrayfun(@(j) 10^(-alpha_loss * L(j)/10), 1:N);
 
 % 发射功率 P_tx(j)
-P_tx = arrayfun(@(j) 0.2 * 10^((2 + 0.2 * L(j)) / 10) / 1000, 1:N);
+P_tx = arrayfun(@(j) 10^((5 + 0.2 * L(j)) / 10) / 1000, 1:N);
 
+% = 10^((0.2·L_j + 5)/10) / 1000 
 % Dinkelbach 参数
    
 theta = 0;

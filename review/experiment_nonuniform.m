@@ -15,7 +15,7 @@ cvx_expert true;
 M = 10;                    % 光纤数量
 N = 5;                    % 设备数量
 alpha_loss = 0.2;         % 光纤损耗 (dB/km)
-P_total = 15;             % 总供电功率 (W)
+P_total = 25;             % 总供电功率 (W)
 T_max = 1.4;              % 最大允许时延 (s)
 
 P_static = 0.1;           % 静态功率 (W)
@@ -28,7 +28,7 @@ R = 500;                  % 光纤速率 (Mbit/s)
 
 f_CPU_min = 500; f_CPU_max = 1000;   % MHz
 f_s_min = 1;      f_s_max = 2;        % MHz
-P_fiber_min = 0;  P_fiber_max = 2;    % W
+P_fiber_min = 0;  P_fiber_max = 3;    % W
 
 %% ========== 三组非均匀部署场景 ==========
 %scenarios = {

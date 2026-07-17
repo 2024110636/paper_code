@@ -15,7 +15,7 @@ M = 10;
 L0 = 5;
 r = 1.5;
 alpha_loss = 0.2;
-P_total = 20;
+P_total = 25;
 T_max = 1.4;
 oe_eta = 0.3;
 P_static = 0.1;
@@ -27,10 +27,12 @@ n_flop = 100;
 R = 500;
 f_CPU_min = 500; f_CPU_max = 1000;
 f_s_min = 1;     f_s_max = 2;
-P_fiber_min = 0; P_fiber_max = 2;
+P_fiber_min = 0; P_fiber_max = 3;
 
-%% 打开结果文件
-fid = fopen('D:\OneDrive\文档\Post_student\code\paper_matlab\review\results_N_sweep.txt', 'w');
+%% 打开结果文件（根据P_total自动命名，避免覆盖）
+output_dir = 'D:\OneDrive\文档\Post_student\code\paper_matlab\review';
+filename = sprintf('results_N_sweep_%dW.txt', P_total);
+fid = fopen(fullfile(output_dir, filename), 'w');
 if fid == -1
     error('无法创建文件，请检查路径权限');
 end
@@ -223,7 +225,7 @@ fprintf(fid, '  Done.\n');
 fprintf(fid, '============================================================\n');
 fclose(fid);
 
-fprintf('\nAll results saved to results_N_sweep_18W.txt\n');
+fprintf('\nAll results saved to %s\n', filename);
 
 
 %% 辅助函数

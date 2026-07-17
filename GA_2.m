@@ -6,10 +6,10 @@ N = 7;          % 设备数量
 L0 = 5;         % 基础距离 (km)
 r = 1.5;        % 距离增量 (km/设备)
 alpha_loss = 0.2;   % 光纤损耗 (dB/km)
-P_total = 15;       % 总功率 (W)
+P_total = 25;       % 总功率 (W)
 T_max = 1.4;        % 最大时延 (s)
 P_static = 0.1;     % 静态功耗 (W)
-C_S = 0.5;          % 采样功耗系数 (W/MHz)
+C_S = 0.2;          % 采样功耗系数 (W/MHz)
 C_CPU = 0.001;      % CPU功耗系数 (W/GHz^3)
 s = 2;              % 样本大小 (bit)
 T0 = 1;             % 采样时间 (s)
@@ -20,7 +20,7 @@ f_CPU_max = 1000;   % CPU最大频率 (MHz)
 f_s_min = 1;        % 采样最小频率 (MHz)
 f_s_max = 2;        % 采样最大频率 (MHz)
 P_fiber_min = 0;    % 光纤最小功率 (W)
-P_fiber_max = 2;    % 光纤最大功率 (W)
+P_fiber_max = 3;    % 光纤最大功率 (W)
 output_interval = 1;
 
 

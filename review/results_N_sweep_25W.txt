@@ -1,0 +1,168 @@
+============================================================
+  EE-Opt Results: N = 3 to 8
+  M=10, P_total=25W, P_fiber_max=3W, eta_oe=0.3
+============================================================
+
+N             EE      Iter        Status  f_s
+------------------------------------------------------------
+
+===== N = 3 =====
+Status: Solved
+Dinkelbach iterations: 4
+EE (theta): 1.558069
+
+f_s   = [1.9999 1.9999 1.9998 ]
+f_CPU = [510.00 510.00 510.00 ]
+P_fiber = [1.6457 0.9546 0.7567 0.7567 0.7567 1.6457 0.7567 0.9546 0.9546 0.7567 ]
+x allocation:
+  Fiber  1 -> Device 2
+  Fiber  2 -> Device 1
+  Fiber  3 -> Device 3
+  Fiber  4 -> Device 3
+  Fiber  5 -> Device 3
+  Fiber  6 -> Device 2
+  Fiber  7 -> Device 3
+  Fiber  8 -> Device 1
+  Fiber  9 -> Device 1
+  Fiber 10 -> Device 3
+
+Constraint check:
+  Device 1 (L=6.5km): P_recv=0.6369W, P_req=0.6369W [OK] | Delay=1.4000s [OK]
+  Device 2 (L=9.5km): P_recv=0.6375W, P_req=0.6375W [OK] | Delay=1.4000s [OK]
+  Device 3 (L=12.5km): P_recv=0.6382W, P_req=0.6382W [OK] | Delay=1.4000s [OK]
+  Total power: 9.9386W / 25W [OK]
+------------------------------------------------------------
+3       1.558069         4        Solved  [2.00 2.00 2.00 ]
+
+===== N = 4 =====
+Status: Solved
+Dinkelbach iterations: 4
+EE (theta): 1.557156
+
+f_s   = [1.9999 1.9999 1.9999 1.9997 ]
+f_CPU = [510.00 510.00 510.01 510.00 ]
+P_fiber = [1.8917 1.6457 1.6457 1.4319 1.0873 1.8917 1.0873 1.4319 1.0873 1.0873 ]
+x allocation:
+  Fiber  1 -> Device 3
+  Fiber  2 -> Device 2
+  Fiber  3 -> Device 2
+  Fiber  4 -> Device 1
+  Fiber  5 -> Device 4
+  Fiber  6 -> Device 3
+  Fiber  7 -> Device 4
+  Fiber  8 -> Device 1
+  Fiber  9 -> Device 4
+  Fiber 10 -> Device 4
+
+Constraint check:
+  Device 1 (L=6.5km): P_recv=0.6369W, P_req=0.6369W [OK] | Delay=1.4000s [OK]
+  Device 2 (L=9.5km): P_recv=0.6375W, P_req=0.6375W [OK] | Delay=1.4000s [OK]
+  Device 3 (L=12.5km): P_recv=0.6383W, P_req=0.6383W [OK] | Delay=1.4000s [OK]
+  Device 4 (L=15.5km): P_recv=0.6391W, P_req=0.6391W [OK] | Delay=1.4000s [OK]
+  Total power: 14.2880W / 25W [OK]
+------------------------------------------------------------
+4       1.557156         4        Solved  [2.00 2.00 2.00 2.00 ]
+
+===== N = 5 =====
+Status: Suboptimal
+Dinkelbach iterations: 15
+EE (theta): 1.518856
+
+f_s   = [2.0000 2.0000 2.0000 1.9999 1.9999 ]
+f_CPU = [510.00 510.00 510.00 510.00 510.00 ]
+P_fiber = [1.4320 1.6457 1.4320 1.8917 2.5007 1.8917 2.5007 2.1748 2.1748 1.6457 ]
+x allocation:
+  Fiber  1 -> Device 1
+  Fiber  2 -> Device 2
+  Fiber  3 -> Device 1
+  Fiber  4 -> Device 3
+  Fiber  5 -> Device 5
+  Fiber  6 -> Device 3
+  Fiber  7 -> Device 5
+  Fiber  8 -> Device 4
+  Fiber  9 -> Device 4
+  Fiber 10 -> Device 2
+
+Constraint check:
+  Device 1 (L=6.5km): P_recv=0.6369W, P_req=0.6369W [OK] | Delay=1.4000s [OK]
+  Device 2 (L=9.5km): P_recv=0.6375W, P_req=0.6375W [OK] | Delay=1.4000s [OK]
+  Device 3 (L=12.5km): P_recv=0.6383W, P_req=0.6383W [OK] | Delay=1.4000s [OK]
+  Device 4 (L=15.5km): P_recv=0.6391W, P_req=0.6391W [OK] | Delay=1.4000s [OK]
+  Device 5 (L=18.5km): P_recv=0.6401W, P_req=0.6401W [OK] | Delay=1.4000s [OK]
+  Total power: 19.2898W / 25W [OK]
+------------------------------------------------------------
+5       1.518856        15    Suboptimal  [2.00 2.00 2.00 2.00 2.00 ]
+
+===== N = 6 =====
+Status: Suboptimal
+Dinkelbach iterations: 3
+EE (theta): 1.409586
+
+f_s   = [2.0000 1.7231 2.0000 1.9999 1.9999 1.9999 ]
+f_CPU = [510.00 508.62 510.00 510.00 510.00 510.00 ]
+P_fiber = [2.8639 2.8761 2.1748 2.1748 1.8917 2.5007 3.0000 1.8917 2.8761 2.5007 ]
+x allocation:
+  Fiber  1 -> Device 1
+  Fiber  2 -> Device 6
+  Fiber  3 -> Device 4
+  Fiber  4 -> Device 4
+  Fiber  5 -> Device 3
+  Fiber  6 -> Device 5
+  Fiber  7 -> Device 2
+  Fiber  8 -> Device 3
+  Fiber  9 -> Device 6
+  Fiber 10 -> Device 5
+
+Constraint check:
+  Device 1 (L=6.5km): P_recv=0.6369W, P_req=0.6369W [OK] | Delay=1.4000s [OK]
+  Device 2 (L=9.5km): P_recv=0.5811W, P_req=0.5811W [OK] | Delay=1.4000s [OK]
+  Device 3 (L=12.5km): P_recv=0.6383W, P_req=0.6383W [OK] | Delay=1.4000s [OK]
+  Device 4 (L=15.5km): P_recv=0.6391W, P_req=0.6391W [OK] | Delay=1.4000s [OK]
+  Device 5 (L=18.5km): P_recv=0.6401W, P_req=0.6401W [OK] | Delay=1.4000s [OK]
+  Device 6 (L=21.5km): P_recv=0.6411W, P_req=0.6411W [OK] | Delay=1.4000s [OK]
+  Total power: 24.7506W / 25W [OK]
+------------------------------------------------------------
+6       1.409586         3    Suboptimal  [2.00 1.72 2.00 2.00 2.00 2.00 ]
+
+===== N = 7 =====
+Status: Suboptimal
+Dinkelbach iterations: 4
+EE (theta): 1.221649
+
+f_s   = [1.9999 1.7230 1.3517 1.0271 1.7327 1.0654 1.0001 ]
+f_CPU = [510.00 508.62 506.76 505.14 508.66 505.33 505.00 ]
+P_fiber = [2.9999 2.0215 2.2878 2.2589 2.9998 2.2878 2.9999 2.0215 2.2589 2.8639 ]
+x allocation:
+  Fiber  1 -> Device 2
+  Fiber  2 -> Device 6
+  Fiber  3 -> Device 5
+  Fiber  4 -> Device 7
+  Fiber  5 -> Device 4
+  Fiber  6 -> Device 5
+  Fiber  7 -> Device 3
+  Fiber  8 -> Device 6
+  Fiber  9 -> Device 7
+  Fiber 10 -> Device 1
+
+Constraint check:
+  Device 1 (L=6.5km): P_recv=0.6369W, P_req=0.6369W [OK] | Delay=1.4000s [OK]
+  Device 2 (L=9.5km): P_recv=0.5811W, P_req=0.5811W [OK] | Delay=1.4000s [OK]
+  Device 3 (L=12.5km): P_recv=0.5061W, P_req=0.5061W [OK] | Delay=1.4000s [OK]
+  Device 4 (L=15.5km): P_recv=0.4408W, P_req=0.4408W [OK] | Delay=1.4000s [OK]
+  Device 5 (L=18.5km): P_recv=0.5856W, P_req=0.5856W [OK] | Delay=1.4000s [OK]
+  Device 6 (L=21.5km): P_recv=0.4506W, P_req=0.4506W [OK] | Delay=1.4000s [OK]
+  Device 7 (L=24.5km): P_recv=0.4386W, P_req=0.4386W [OK] | Delay=1.4000s [OK]
+  Total power: 25.0000W / 25W [OK]
+------------------------------------------------------------
+7       1.221649         4    Suboptimal  [2.00 1.72 1.35 1.03 1.73 1.07 1.00 ]
+
+===== N = 8 =====
+Status: Infeasible
+Dinkelbach iterations: 1
+EE (theta): 0.000000
+------------------------------------------------------------
+8       0.000000         1    Infeasible  [NaN NaN NaN NaN NaN NaN NaN NaN ]
+
+============================================================
+  Done.
+============================================================

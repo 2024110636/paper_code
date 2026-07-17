@@ -9,7 +9,7 @@ clear; clc; close all;
 M = 10;
 N = 5;
 alpha_loss = 0.2;
-P_total = 15;
+P_total = 25;
 T_max = 1.4;
 P_static = 0.1;
 C_S = 0.2;
@@ -20,7 +20,7 @@ n_flop = 100;
 R = 500;
 f_CPU_min = 500; f_CPU_max = 1000;
 f_s_min = 1;     f_s_max = 2;
-P_fiber_min = 0; P_fiber_max = 2;
+P_fiber_min = 0; P_fiber_max = 3;
 eta_oe = 0.3;
 penalty_coeff = 1e3;
 

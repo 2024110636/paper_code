@@ -11,7 +11,7 @@ cvx_expert true;
 
 %% 参数设置
 M = 10         % 光纤数量
-N = 4;         % 设备数量
+N = 7;         % 设备数量
 %L0 = 5;         % 基础距离 (km)
 %r = 1.5;        % 每个设备增加距离 (km)
 alpha_loss = 0.2;   % 光纤损耗 (dB/km)
@@ -35,7 +35,9 @@ f_s_min = 1;      f_s_max = 2;        % MHz
 P_fiber_min = 0; P_fiber_max = 2;     % W
 
 % 光纤损耗系数 alpha_f(j)
-L = @(j) L0 + r * (2 * j - 1);
+%L = @(j) L0 + r * (2 * j - 1);
+rng(42);                      % 固定随机种子，保证结果可复现
+L = sort(5 + 20 * rand(1, N)); % [5,25]范围内随机距离，排序保证递增
 alpha_f = arrayfun(@(j) 10^(-alpha_loss * L(j)/10), 1:N);
 
 % 发射功率 P_tx(j)
